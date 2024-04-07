@@ -25,11 +25,10 @@ import org.apache.iceberg.util.PropertyUtil;
 
 import java.util.Map;
 
-public class RESTServerCatalogAdapter extends RESTCatalogAdapter {
+public class RESTServerCatalogAdapter extends RestCatalogAdapterV2 {
     private static final String INCLUDE_CREDENTIALS = "include-credentials";
 
     private final CatalogContext catalogContext;
-
 
     public RESTServerCatalogAdapter(CatalogContext catalogContext) {
         super(catalogContext.catalog());
@@ -38,8 +37,9 @@ public class RESTServerCatalogAdapter extends RESTCatalogAdapter {
     }
 
     @Override
-    public <T extends RESTResponse> T handleRequest(Route route, Map<String, String> vars, Object body, Class<T> responseType) {
-        T restResponse = super.handleRequest(route, vars, body, responseType);
+    public <T extends RESTResponse> T handleRequest(Route route, Map<String, String> vars, Object body,
+            Class<T> responseType, String userId) {
+        T restResponse = super.handleRequest(route, vars, body, responseType, userId);
 
         if (restResponse instanceof LoadTableResponse loadTableResponse) {
             if (PropertyUtil.propertyAsBoolean(catalogContext.configuration(), INCLUDE_CREDENTIALS, false)) {
@@ -56,7 +56,8 @@ public class RESTServerCatalogAdapter extends RESTCatalogAdapter {
         }
 
         if (catalogConfig.containsKey(S3FileIOProperties.SECRET_ACCESS_KEY)) {
-            tableConfig.put(S3FileIOProperties.SECRET_ACCESS_KEY, catalogConfig.get(S3FileIOProperties.SECRET_ACCESS_KEY));
+            tableConfig.put(S3FileIOProperties.SECRET_ACCESS_KEY,
+                    catalogConfig.get(S3FileIOProperties.SECRET_ACCESS_KEY));
         }
 
         if (catalogConfig.containsKey(S3FileIOProperties.SESSION_TOKEN)) {
